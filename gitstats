@@ -251,7 +251,7 @@ class GitDataCollector(DataCollector):
 	def collect(self, dir):
 		DataCollector.collect(self, dir)
 
-		self.total_authors += int(getpipeoutput(['git shortlog -s %s' % getcommitrange(), 'wc -l']))
+		self.total_authors += int(getpipeoutput(['git shortlog --no-merges -s %s' % getcommitrange(), 'wc -l']))
 		#self.total_lines = int(getoutput('git-ls-files -z |xargs -0 cat |wc -l'))
 
 		# tags
@@ -262,7 +262,7 @@ class GitDataCollector(DataCollector):
 			(hash, tag) = line.split(' ')
 
 			tag = tag.replace('refs/tags/', '')
-			output = getpipeoutput(['git log "%s" --pretty=format:"%%at %%aN" -n 1' % hash])
+			output = getpipeoutput(['git log "%s" --no-merges --pretty=format:"%%at %%aN" -n 1' % hash])
 			if len(output) > 0:
 				parts = output.split(' ')
 				stamp = 0
@@ -294,7 +294,7 @@ class GitDataCollector(DataCollector):
 
 		# Collect revision statistics
 		# Outputs "<stamp> <date> <time> <timezone> <author> '<' <mail> '>'"
-		lines = getpipeoutput(['git rev-list --pretty=format:"%%at %%ai %%aN <%%aE>" %s' % getcommitrange('HEAD'), 'grep -v ^commit']).split('\n')
+		lines = getpipeoutput(['git rev-list --no-merges --pretty=format:"%%at %%ai %%aN <%%aE>" %s' % getcommitrange('HEAD'), 'grep -v ^commit']).split('\n')
 		for line in lines:
 			parts = line.split(' ', 4)
 			author = ''
@@ -404,7 +404,7 @@ class GitDataCollector(DataCollector):
 
 		# TODO Optimize this, it's the worst bottleneck
 		# outputs "<stamp> <files>" for each revision
-		revlines = getpipeoutput(['git rev-list --pretty=format:"%%at %%T" %s' % getcommitrange('HEAD'), 'grep -v ^commit']).strip().split('\n')
+		revlines = getpipeoutput(['git rev-list --no-merges --pretty=format:"%%at %%T" %s' % getcommitrange('HEAD'), 'grep -v ^commit']).strip().split('\n')
 		lines = []
 		for revline in revlines:
 			time, rev = revline.split(' ')
@@ -465,7 +465,7 @@ class GitDataCollector(DataCollector):
 		extra = ''
 		if conf['linear_linestats']:
 			extra = '--first-parent -m'
-		lines = getpipeoutput(['git log --shortstat %s --pretty=format:"%%at %%aN" %s' % (extra, getcommitrange('HEAD'))]).split('\n')
+		lines = getpipeoutput(['git log --no-merges --shortstat %s --pretty=format:"%%at %%aN" %s' % (extra, getcommitrange('HEAD'))]).split('\n')
 		lines.reverse()
 		files = 0; inserted = 0; deleted = 0; total_lines = 0
 		author = None
@@ -521,7 +521,7 @@ class GitDataCollector(DataCollector):
 		# Similar to the above, but never use --first-parent
 		# (we need to walk through every commit to know who
 		# committed what, not just through mainline)
-		lines = getpipeoutput(['git log --shortstat --date-order --pretty=format:"%%at %%aN" %s' % (getcommitrange('HEAD'))]).split('\n')
+		lines = getpipeoutput(['git log --no-merges --shortstat --date-order --pretty=format:"%%at %%aN" %s' % (getcommitrange('HEAD'))]).split('\n')
 		lines.reverse()
 		files = 0; inserted = 0; deleted = 0
 		author = None
@@ -663,7 +663,7 @@ class GitDataCollector(DataCollector):
 		return self.total_size
 	
 	def revToDate(self, rev):
-		stamp = int(getpipeoutput(['git log --pretty=format:%%at "%s" -n 1' % rev]))
+		stamp = int(getpipeoutput(['git log --no-merges --pretty=format:%%at "%s" -n 1' % rev]))
 		return datetime.datetime.fromtimestamp(stamp).strftime('%Y-%m-%d')
 
 class ReportCreator:
@@ -1022,8 +1022,8 @@ class HTMLReportCreator(ReportCreator):
 		f.write(html_header(2, 'Commits by Domains'))
 		domains_by_commits = getkeyssortedbyvaluekey(data.domains, 'commits')
 		domains_by_commits.reverse() # most first
-		f.write('<div class="vtable"><table>')
-		f.write('<tr><th>Domains</th><th>Total (%)</th></tr>')
+		f.write('<div class="table table-striped table-condensed"><table>')
+		f.write('<tr><th class="unsortable">Domains</th><th class="unsortable">Total (%)</th></tr>')
 		fp = open(path + '/domains.dat', 'w')
 		n = 0
 		for domain in domains_by_commits:
@@ -1033,7 +1033,7 @@ class HTMLReportCreator(ReportCreator):
 			n += 1
 			info = data.getDomainInfo(domain)
 			fp.write('%s %d %d\n' % (domain, n , info['commits']))
-			f.write('<tr><th>%s</th><td>%d (%.2f%%)</td></tr>' % (domain, info['commits'], (100.0 * info['commits'] / totalcommits)))
+			f.write('<tr><td>%s</td><td>%d (%.2f%%)</td></tr>' % (domain, info['commits'], (100.0 * info['commits'] / totalcommits)))
 		f.write('</table></div>')
 		f.write('<img src="domains.png" alt="Commits by Domains" />')
 		fp.close()

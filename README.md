@@ -3,7 +3,9 @@
 gitstats is a statistics generator for git repositories.  It is mostly intended
 for developers, as a way to check some development statistics for a project.
 
-Currently it produces only HTML output with tables and graphs.
+Currently it produces only HTML output with tables and graphs. 
+
+This forked version ignores merge commits.
 
 Requirements
 ============
