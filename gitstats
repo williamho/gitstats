@@ -768,7 +768,7 @@ class HTMLReportCreator(ReportCreator):
 			if weeks[i] in data.activity_by_year_week:
 				percentage = float(data.activity_by_year_week[weeks[i]]) / data.activity_by_year_week_peak
 			height = max(1, int(200 * percentage))
-			f.write('<td style="text-align: center; vertical-align: bottom">%d<div style="display: block; background-color: red; width: 20px; height: %dpx"></div></td>' % (commits, height))
+			f.write('<td style="text-align: center; vertical-align: bottom">%d<div style="display: block; background-color: #69afff; width: 20px; height: %dpx"></div></td>' % (commits, height))
 
 		# bottom row: year/week
 		f.write('</tr><tr>')
@@ -787,8 +787,9 @@ class HTMLReportCreator(ReportCreator):
 		fp = open(path + '/hour_of_day.dat', 'w')
 		for i in range(0, 24):
 			if i in hour_of_day:
-				r = 127 + int((float(hour_of_day[i]) / data.activity_by_hour_of_day_busiest) * 128)
-				f.write('<td style="background-color: rgb(%d, 0, 0)">%d</td>' % (r, hour_of_day[i]))
+				r = int((1-(float(hour_of_day[i]) / data.activity_by_hour_of_day_busiest)) * 255)
+				g = int(0.5*r + 127)
+				f.write('<td style="background-color: rgb(%d, %d, 255)">%d</td>' % (r, g, hour_of_day[i]))
 				fp.write('%d %d\n' % (i, hour_of_day[i]))
 			else:
 				f.write('<td>0</td>')
@@ -798,8 +799,9 @@ class HTMLReportCreator(ReportCreator):
 		totalcommits = data.getTotalCommits()
 		for i in range(0, 24):
 			if i in hour_of_day:
-				r = 127 + int((float(hour_of_day[i]) / data.activity_by_hour_of_day_busiest) * 128)
-				f.write('<td style="background-color: rgb(%d, 0, 0)">%.2f</td>' % (r, (100.0 * hour_of_day[i]) / totalcommits))
+				r = int((1-(float(hour_of_day[i]) / data.activity_by_hour_of_day_busiest)) * 255)
+				g = int(0.5*r + 127)
+				f.write('<td style="background-color: rgb(%d, %d, 255)">%.2f</td>' % (r, g, (100.0 * hour_of_day[i]) / totalcommits))
 			else:
 				f.write('<td>0.00</td>')
 		f.write('</tr></table>')
@@ -854,8 +856,9 @@ class HTMLReportCreator(ReportCreator):
 					commits = 0
 				if commits != 0:
 					f.write('<td')
-					r = 127 + int((float(commits) / data.activity_by_hour_of_week_busiest) * 128)
-					f.write(' style="background-color: rgb(%d, 0, 0)"' % r)
+					r = int((1-(float(commits) / data.activity_by_hour_of_week_busiest)) * 255)
+					g = int(0.5*r + 127)
+					f.write(' style="background-color: rgb(%d, %d, 255)"' % (r,g))
 					f.write('>%d</td>' % commits)
 				else:
 					f.write('<td></td>')
@@ -913,8 +916,9 @@ class HTMLReportCreator(ReportCreator):
 		max_commits_on_tz = max(data.commits_by_timezone.values())
 		for i in sorted(data.commits_by_timezone.keys(), key = lambda n : int(n)):
 			commits = data.commits_by_timezone[i]
-			r = 127 + int((float(commits) / max_commits_on_tz) * 128)
-			f.write('<tr><th>%s</th><td style="background-color: rgb(%d, 0, 0)">%d</td></tr>' % (i, r, commits))
+			r = int((1-(float(commits) / max_commits_on_tz)) * 255)
+			g = int(0.5*r + 127)
+			f.write('<tr><th>%s</th><td style="background-color: rgb(%d, %d, 255)">%d</td></tr>' % (i, r, g, commits))
 		f.write('</tr></table>')
 		f.write(end_row())
 
@@ -1166,7 +1170,7 @@ set xrange [0.5:24.5]
 set xtics 4
 set grid y
 set ylabel "Commits"
-plot 'hour_of_day.dat' using 1:2:(0.5) w boxes fs solid
+plot 'hour_of_day.dat' using 1:2:(0.5) w boxes fs solid linecolor rgb "#69afff"
 """)
 		f.close()
 
@@ -1181,7 +1185,7 @@ set xrange [0.5:7.5]
 set xtics 1
 set grid y
 set ylabel "Commits"
-plot 'day_of_week.dat' using 1:3:(0.5):xtic(2) w boxes fs solid
+plot 'day_of_week.dat' using 1:3:(0.5):xtic(2) w boxes fs solid linecolor rgb "#69afff"
 """)
 		f.close()
 
@@ -1196,7 +1200,7 @@ unset xtics
 set yrange [0:]
 set grid y
 set ylabel "Commits"
-plot 'domains.dat' using 2:3:(0.5) with boxes fs solid, '' using 2:3:1 with labels rotate by 45 offset 0,1
+plot 'domains.dat' using 2:3:(0.5) with boxes fs solid linecolor rgb "#69afff", '' using 2:3:1 with labels rotate by 45 offset 0,1 
 """)
 		f.close()
 
@@ -1211,7 +1215,7 @@ set xrange [0.5:12.5]
 set xtics 1
 set grid y
 set ylabel "Commits"
-plot 'month_of_year.dat' using 1:2:(0.5) w boxes fs solid
+plot 'month_of_year.dat' using 1:2:(0.5) w boxes fs solid linecolor rgb "#69afff"
 """)
 		f.close()
 
@@ -1229,7 +1233,7 @@ set xtics rotate
 set bmargin 5
 set grid y
 set ylabel "Commits"
-plot 'commits_by_year_month.dat' using 1:2:(0.5) w boxes fs solid
+plot 'commits_by_year_month.dat' using 1:2:(0.5) w boxes fs solid linecolor rgb "#69afff"
 """)
 		f.close()
 
@@ -1244,7 +1248,7 @@ set xtics 1 rotate
 set grid y
 set ylabel "Commits"
 set yrange [0:]
-plot 'commits_by_year.dat' using 1:2:(0.5) w boxes fs solid
+plot 'commits_by_year.dat' using 1:2:(0.5) w boxes fs solid linecolor rgb "#69afff"
 """)
 		f.close()
 
